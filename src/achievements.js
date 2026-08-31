@@ -82,12 +82,30 @@ export const ACHIEVEMENT_DEFINITIONS = [
   points: 50,
 }));
 
+function loadAchievementData(profileId) {
+  const data = loadAchievements(profileId);
+  data.statuses ||= {};
+  let changed = false;
+  for (const definition of ACHIEVEMENT_DEFINITIONS) {
+    const achievement = data.achievements.find((item) => item.definitionId === definition.id);
+    const status = achievement
+      ? { state: "unlocked", completedAt: achievement.completedAt }
+      : { state: "locked", completedAt: null };
+    if (JSON.stringify(data.statuses[definition.id]) !== JSON.stringify(status)) {
+      data.statuses[definition.id] = status;
+      changed = true;
+    }
+  }
+  if (changed) saveAchievements(profileId, data);
+  return data;
+}
+
 export function listAchievementCatalog(profileId) {
-  const unlocked = new Map(listAchievements(profileId).map((achievement) => [achievement.definitionId, achievement]));
+  const data = loadAchievementData(profileId);
   return ACHIEVEMENT_DEFINITIONS.map((definition) => ({
     ...definition,
-    unlocked: unlocked.has(definition.id),
-    completedAt: unlocked.get(definition.id)?.completedAt ?? null,
+    unlocked: data.statuses[definition.id].state === "unlocked",
+    completedAt: data.statuses[definition.id].completedAt,
   }));
 }
 
@@ -134,7 +152,7 @@ export function unlockEligibleAchievements(profileId, tasks) {
   const completedTasks = tasks
     .filter((task) => task.completed && task.completedAt)
     .sort((first, second) => first.completedAt.localeCompare(second.completedAt));
-  const data = loadAchievements(profileId);
+  const data = loadAchievementData(profileId);
   const unlockedIds = new Set(data.achievements.map((achievement) => achievement.definitionId));
   const unlocked = [];
 
@@ -145,10 +163,12 @@ export function unlockEligibleAchievements(profileId, tasks) {
       definitionId: definition.id,
       taskId: completedTasks.at(-1).id,
       title: definition.title,
+      description: definition.description,
       points: definition.points,
       completedAt: new Date().toISOString(),
     };
     data.achievements.push(achievement);
+    data.statuses[definition.id] = { state: "unlocked", completedAt: achievement.completedAt };
     unlocked.push(achievement);
   }
   if (unlocked.length > 0) saveAchievements(profileId, data);

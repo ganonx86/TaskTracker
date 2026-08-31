@@ -10,6 +10,7 @@ function findTask(data, id) {
 
 // Base de 5 pts par sous-tache terminee, plafonnee a 50 pts par tache.
 export function computeTaskPoints(task) {
+  if (!task.subtasks) return task.completed ? POINTS_PER_SUBTASK : 0;
   if (task.subtasks.length === 0) return task.completed ? MAX_POINTS_PER_TASK : 0;
   const done = task.subtasks.filter((s) => s.completed).length;
   return Math.min(done * POINTS_PER_SUBTASK, MAX_POINTS_PER_TASK);

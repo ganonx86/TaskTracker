@@ -1,5 +1,4 @@
 import path from "path";
-import { fileURLToPath } from "url";
 import express from "express";
 import {
   addTask,
@@ -8,17 +7,21 @@ import {
   completeItem,
   removeItem,
   setDeadline,
+  computeTaskPoints,
 } from "./tasks.js";
-import { listProfiles, createProfile, updateProfile, removeProfile } from "./profiles.js";
+import { listProfiles, createProfile, updateProfile, removeProfile, archiveProfilePoints } from "./profiles.js";
 import { listAchievements, listAchievementCatalog, unlockEligibleAchievements } from "./achievements.js";
+import { getAvatarsDirectory } from "./store.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PROJECT_DIR = process.pkg
+  ? path.resolve(path.dirname(process.pkg.entrypoint), "..")
+  : path.resolve(path.dirname(process.argv[1]), "..");
 
 export function createServer() {
   const app = express();
   app.use(express.json({ limit: "5mb" }));
-  app.use(express.static(path.join(__dirname, "..", "public")));
-  app.use("/avatars", express.static(path.join(__dirname, "..", "data", "avatars")));
+  app.use(express.static(path.join(PROJECT_DIR, "public")));
+  app.use("/avatars", express.static(getAvatarsDirectory()));
 
   app.get("/api/profiles", (req, res) => {
     res.json(listProfiles());
@@ -100,12 +103,11 @@ export function createServer() {
 
       const item = completeItem(profileId, id, { done });
 
-      let achievement = null;
+      let achievements = [];
       if (done && taskBefore && !wasCompleted) {
-        const unlocked = unlockEligibleAchievements(profileId, listTasks(profileId));
-        achievement = unlocked.at(-1) ?? null;
+        achievements = unlockEligibleAchievements(profileId, listTasks(profileId));
       }
-      res.json({ ...item, achievement });
+      res.json({ ...item, achievement: achievements.at(-1) ?? null, achievements });
     } catch (err) {
       res.status(400).json({ error: err.message });
     }
@@ -131,7 +133,10 @@ export function createServer() {
 
   app.delete("/api/profiles/:profileId/items/:id", (req, res) => {
     try {
-      const removed = removeItem(Number(req.params.profileId), Number(req.params.id));
+      const profileId = Number(req.params.profileId);
+      const removed = removeItem(profileId, Number(req.params.id));
+      const pointsArchives = computeTaskPoints(removed);
+      if (pointsArchives > 0) archiveProfilePoints(profileId, pointsArchives);
       res.json(removed);
     } catch (err) {
       res.status(400).json({ error: err.message });

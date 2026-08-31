@@ -30,11 +30,24 @@ export function createProfile({ name, nom, prenom, dateNaissance, avatar, photo 
     dateNaissance: dateNaissance || null,
     avatar: avatar && AVATARS.includes(avatar) ? avatar : AVATARS[data.profiles.length % AVATARS.length],
     photo: null,
+    pointsArchives: 0,
   };
   if (photo) {
     profile.photo = saveAvatarPhoto(profile.id, photo);
   }
   data.profiles.push(profile);
+  saveProfiles(data);
+  return profile;
+}
+
+export function archiveProfilePoints(id, points) {
+  if (points <= 0) return getProfile(id);
+  const data = loadProfiles();
+  const profile = data.profiles.find((p) => p.id === id);
+  if (!profile) {
+    throw new Error(`Profil #${id} introuvable.`);
+  }
+  profile.pointsArchives = (profile.pointsArchives || 0) + points;
   saveProfiles(data);
   return profile;
 }

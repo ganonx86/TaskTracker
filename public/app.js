@@ -25,7 +25,9 @@ const activeAvatarEl = document.getElementById("active-avatar");
 const activeNameEl = document.getElementById("active-name");
 
 const AVATARS = ["🎮", "🚀", "🐱", "🐉", "🦊", "🍕", "⚡", "🌟", "🎧", "🏆"];
-const ACTIVE_PROFILE_KEY = "tasktracker:activeProfile";
+const ACTIVE_PROFILE_COOKIE = "tasktracker_active_profile";
+const PROFILES_COOKIE = "tasktracker_profiles";
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 let activeProfile = null;
 let selectedAvatar = AVATARS[0];
 let selectedPhoto = null; // data URL de la nouvelle photo choisie
@@ -50,6 +52,27 @@ async function api(url, options) {
     throw new Error(data?.error || "Une erreur est survenue.");
   }
   return data;
+}
+
+function setCookie(name, value) {
+  document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${COOKIE_MAX_AGE}; Path=/; SameSite=Lax`;
+}
+
+function getCookie(name) {
+  const prefix = `${name}=`;
+  const value = document.cookie.split("; ").find((cookie) => cookie.startsWith(prefix));
+  return value ? decodeURIComponent(value.slice(prefix.length)) : null;
+}
+
+function saveProfilesCookie(profiles) {
+  const summaries = profiles.slice(0, 20).map(({ id, name, avatar, photo }) => ({ id, name, avatar, photo }));
+  setCookie(PROFILES_COOKIE, JSON.stringify(summaries));
+}
+
+async function syncProfilesCookie() {
+  const profiles = await api("/api/profiles");
+  saveProfilesCookie(profiles);
+  return profiles;
 }
 
 function isOverdue(deadline, completed) {
@@ -124,9 +147,10 @@ async function toggleComplete(id, completed) {
       body: JSON.stringify({ completed }),
     });
     await refresh();
-    if (result.achievement) {
-      showCelebration(result.achievement.title, result.achievement.points);
-    }
+    const achievements = result.achievements || (result.achievement ? [result.achievement] : []);
+    achievements.forEach((achievement, index) => {
+      setTimeout(() => showAchievementCelebration(achievement), index * 350);
+    });
   } catch (err) {
     alert(err.message);
   }
@@ -204,7 +228,8 @@ function computeTaskPoints(task) {
 }
 
 function computeTotalScore(tasks) {
-  return tasks.reduce((sum, task) => sum + computeTaskPoints(task), 0);
+  const taskPoints = tasks.reduce((sum, task) => sum + computeTaskPoints(task), 0);
+  return taskPoints + (activeProfile.pointsArchives || 0);
 }
 
 function renderProgressBar(percent) {
@@ -275,11 +300,11 @@ function playPointSound() {
   osc.stop(startTime + 0.2);
 }
 
-function showCelebration(title, points) {
+function showAchievementCelebration(achievement) {
   playAchievementSound();
   const toast = document.createElement("div");
-  toast.className = "toast";
-  toast.innerHTML = `<span class="toast-icon">🏆</span><div><div class="toast-title">Tache terminee ! +${points} pts</div><div class="toast-subtitle">${title}</div></div>`;
+  toast.className = "toast achievement-toast";
+  toast.innerHTML = `<span class="toast-icon">🏆</span><div class="toast-content"><div class="toast-kicker">Succès débloqué</div><div class="toast-title">${achievement.title}</div><div class="toast-subtitle">${achievement.description}</div></div><span class="toast-points">+${achievement.points} pts</span>`;
   document.getElementById("toast-container").appendChild(toast);
   setTimeout(() => {
     toast.classList.add("toast-out");
@@ -303,12 +328,17 @@ function updateScoreBadge(total, delta) {
 }
 
 async function refresh() {
-  const tasks = await api(`/api/profiles/${activeProfile.id}/tasks`);
+  const [tasks, profiles] = await Promise.all([
+    api(`/api/profiles/${activeProfile.id}/tasks`),
+    api("/api/profiles"),
+  ]);
+  activeProfile = profiles.find((profile) => profile.id === activeProfile.id) || activeProfile;
   taskListEl.innerHTML = "";
   if (tasks.length === 0) {
     taskListEl.appendChild(emptyStateEl);
-    updateScoreBadge(0, 0);
-    previousScore = 0;
+    const totalScore = activeProfile.pointsArchives || 0;
+    updateScoreBadge(totalScore, 0);
+    previousScore = totalScore;
     await loadAchievementsPreview();
     return;
   }
@@ -461,6 +491,7 @@ profileForm.addEventListener("submit", async (e) => {
     } else {
       profile = await api("/api/profiles", { method: "POST", body: JSON.stringify(payload) });
     }
+    await syncProfilesCookie();
     closeProfileModal();
     if (activeProfile && activeProfile.id === profile.id) {
       selectProfile(profile);
@@ -490,6 +521,7 @@ function avatarMarkup(profile) {
 
 async function renderProfileGrid() {
   const profiles = await api("/api/profiles");
+  saveProfilesCookie(profiles);
   profileGridEl.innerHTML = "";
   for (const profile of profiles) {
     const tile = document.createElement("button");
@@ -512,7 +544,7 @@ async function renderProfileGrid() {
 
 function selectProfile(profile) {
   activeProfile = profile;
-  localStorage.setItem(ACTIVE_PROFILE_KEY, String(profile.id));
+  setCookie(ACTIVE_PROFILE_COOKIE, String(profile.id));
   activeAvatarEl.innerHTML = avatarMarkup(profile);
   activeNameEl.textContent = profile.name;
   profileScreenEl.classList.add("hidden");
@@ -557,11 +589,14 @@ document.getElementById("dropdown-switch-btn").addEventListener("click", () => {
 async function init() {
   const params = new URLSearchParams(location.search);
   const linkedId = Number(params.get("profile"));
-  if (linkedId) {
+  const savedProfileId = Number(getCookie(ACTIVE_PROFILE_COOKIE));
+  const profileId = linkedId || savedProfileId;
+  if (profileId) {
     history.replaceState(null, "", location.pathname);
     try {
       const profiles = await api("/api/profiles");
-      const profile = profiles.find((p) => p.id === linkedId);
+      saveProfilesCookie(profiles);
+      const profile = profiles.find((p) => p.id === profileId);
       if (profile) {
         selectProfile(profile);
         return;

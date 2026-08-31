@@ -1,11 +1,12 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PROJECT_DIR = process.pkg
+  ? path.resolve(path.dirname(process.pkg.entrypoint), "..")
+  : path.resolve(path.dirname(process.argv[1]), "..");
 const DATA_DIR = process.pkg
   ? path.join(process.env.APPDATA || process.env.LOCALAPPDATA || process.cwd(), "TaskTracker", "data")
-  : path.join(__dirname, "..", "data");
+  : path.join(PROJECT_DIR, "data");
 const PROFILES_FILE = path.join(DATA_DIR, "profiles.json");
 const LEGACY_TASKS_FILE = path.join(DATA_DIR, "tasks.json");
 
@@ -43,6 +44,10 @@ export function deleteAchievements(profileId) {
 }
 
 const AVATARS_DIR = path.join(DATA_DIR, "avatars");
+
+export function getAvatarsDirectory() {
+  return AVATARS_DIR;
+}
 
 function extensionFromDataUrl(dataUrl) {
   const match = /^data:image\/(png|jpeg|jpg|gif|webp);base64,/.exec(dataUrl);
