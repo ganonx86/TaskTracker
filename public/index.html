@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskTracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="profile-screen" class="profile-screen">
+    <h1 class="profile-screen-title">Qui joue ?</h1>
+    <div id="profile-grid" class="profile-grid"></div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <header class="app-header">
+      <div class="app-header-left">
+        <div class="profile-menu">
+          <button id="profile-chip-btn" class="profile-chip" title="Profil">
+            <span id="active-avatar"></span>
+            <span id="active-name"></span>
+          </button>
+          <div id="profile-dropdown" class="profile-dropdown hidden">
+            <button id="dropdown-edit-btn" type="button">✎ Modifier le profil</button>
+            <button id="dropdown-switch-btn" type="button">⇄ Changer de profil</button>
+          </div>
+        </div>
+        <h1>TaskTracker</h1>
+      </div>
+      <div class="app-header-right">
+        <div id="score-badge" class="score-badge" title="Score (Gamerscore)">
+          <span class="score-icon">🏆</span>
+          <span id="score-value">0</span>
+          <span class="score-suffix">pts</span>
+        </div>
+        <a id="view-achievements-btn" href="achievements.html" class="btn btn-ghost">🏆 Succès</a>
+        <button id="add-task-btn" class="btn btn-primary">+ Nouvelle tâche</button>
+      </div>
+    </header>
+
+    <section id="achievements-preview" class="achievements-preview hidden">
+      <h2>Derniers succès</h2>
+      <div id="achievements-preview-list" class="achievements-preview-list"></div>
+    </section>
+
+    <main id="task-list" class="task-list">
+      <p class="empty-state" id="empty-state">Aucune tâche pour le moment.</p>
+    </main>
+  </div>
+
+  <div id="overlay" class="overlay hidden">
+    <div class="modal">
+      <h2 id="modal-title">Nouvelle tâche</h2>
+      <form id="modal-form">
+        <label>
+          Titre
+          <input type="text" id="modal-title-input" required autocomplete="off" />
+        </label>
+        <label>
+          Deadline (optionnel)
+          <input type="date" id="modal-deadline-input" />
+        </label>
+        <div class="modal-actions">
+          <button type="button" id="modal-cancel-btn" class="btn btn-ghost">Annuler</button>
+          <button type="submit" class="btn btn-primary">Valider</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="profile-overlay" class="overlay hidden">
+    <div class="modal modal-profile">
+      <h2 id="profile-modal-title">Nouveau profil</h2>
+      <form id="profile-form">
+        <div class="photo-picker">
+          <div id="photo-preview" class="photo-preview">🎮</div>
+          <div class="photo-picker-actions">
+            <label class="btn btn-ghost file-btn">
+              Choisir une photo
+              <input type="file" id="profile-photo-input" accept="image/png,image/jpeg,image/gif,image/webp" hidden />
+            </label>
+            <button type="button" id="remove-photo-btn" class="btn btn-ghost hidden">Retirer la photo</button>
+          </div>
+        </div>
+        <label>
+          Nametag (pseudo)
+          <input type="text" id="profile-name-input" required autocomplete="off" maxlength="20" />
+        </label>
+        <div class="form-row">
+          <label>
+            Prénom
+            <input type="text" id="profile-prenom-input" autocomplete="off" maxlength="40" />
+          </label>
+          <label>
+            Nom
+            <input type="text" id="profile-nom-input" autocomplete="off" maxlength="40" />
+          </label>
+        </div>
+        <label>
+          Date de naissance
+          <input type="date" id="profile-birthdate-input" />
+        </label>
+        <label>
+          Avatar (utilise si aucune photo)
+          <div id="avatar-picker" class="avatar-picker"></div>
+        </label>
+        <div class="modal-actions">
+          <button type="button" id="profile-cancel-btn" class="btn btn-ghost">Annuler</button>
+          <button type="submit" id="profile-submit-btn" class="btn btn-primary">Créer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskTracker — Succès</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="achievements-page">
+    <a href="index.html" id="back-link" class="back-link">← Retour aux tâches</a>
+
+    <header class="app-header">
+      <div class="app-header-left">
+        <span id="active-avatar" class="profile-chip-avatar"></span>
+        <h1>Succès de <span id="active-name"></span></h1>
+      </div>
+    </header>
+
+    <div class="achievements-stats">
+      <div class="achievements-stat">
+        <div class="stat-value" id="stat-count">0</div>
+        <div class="stat-label">Succès débloqués</div>
+      </div>
+      <div class="achievements-stat">
+        <div class="stat-value" id="stat-points">0</div>
+        <div class="stat-label">Points cumulés</div>
+      </div>
+    </div>
+
+    <div id="achievements-full-list" class="achievements-full-list">
+      <p class="empty-state" id="achievements-empty-state">Aucun succès débloqué pour le moment.</p>
+    </div>
+  </div>
+
+  <script src="achievements.js"></script>
+</body>
+</html>

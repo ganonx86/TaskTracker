@@ -1,0 +1,6 @@
+tasks.json
+tasks-*.json
+profiles.json
+achievements-*.json
+avatars/*
+!avatars/.gitkeep
