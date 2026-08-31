@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AssemblyName>TaskTracker</AssemblyName>
     <StaticWebAssetBasePath>/</StaticWebAssetBasePath>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="public/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
