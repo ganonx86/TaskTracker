@@ -21,7 +21,7 @@ dotnet publish -c Release -f net10.0-windows -r win-x64 --self-contained true -p
 ```
 
 Telechargez l'archive Windows depuis la page des releases GitHub, puis extrayez
-son contenu et lancez `TaskTracker.exe`. L'application s'ouvre dans sa propre
+son contenu avant de lancer `dist\TaskTracker.exe`. L'application s'ouvre dans sa propre
 fenetre, sans lancer le navigateur. Le runtime Microsoft Edge WebView2 doit etre
 installe (il est inclus avec Windows 11 et les versions recentes de Windows 10).
 `TaskTracker.bat` reste un lanceur pratique pour les sources : il execute le

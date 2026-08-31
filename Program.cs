@@ -12,7 +12,7 @@ if (isGui)
 {
 	var portIndex = Array.FindIndex(args, argument => argument is "--port" or "-p");
 	port = portIndex >= 0 && portIndex + 1 < args.Length && int.TryParse(args[portIndex + 1], out var customPort) ? customPort : 3000;
-	builder.WebHost.UseUrls($"http://localhost:{port}");
+	builder.WebHost.UseUrls(useDesktopWindow ? "http://127.0.0.1:0" : $"http://localhost:{port}");
 }
 builder.Services.AddSingleton<DataStore>();
 builder.Services.AddSingleton<TaskService>();
@@ -51,9 +51,17 @@ app.MapGet("/api/profiles/{profileId:int}/achievement-catalog", (int profileId, 
 #if WINDOWS
 if (useDesktopWindow)
 {
-	await app.StartAsync();
 	ApplicationConfiguration.Initialize();
-	Application.Run(new MainWindow(app, new Uri($"http://localhost:{port}")));
+	try
+	{
+		await app.StartAsync();
+		var address = app.Urls.Single();
+		Application.Run(new MainWindow(app, new Uri(address)));
+	}
+	catch (Exception exception)
+	{
+		MessageBox.Show($"Impossible de demarrer TaskTracker.\n\n{exception.Message}", "TaskTracker", MessageBoxButtons.OK, MessageBoxIcon.Error);
+	}
 	return;
 }
 #endif
