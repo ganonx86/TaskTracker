@@ -1,24 +1,47 @@
 # TaskTracker
 
-CLI simple pour gerer des taches, des sous-taches et leurs deadlines, avec une
-interface graphique premium accessible dans le navigateur.
+Gestionnaire de taches, sous-taches et deadlines ecrit en C# avec ASP.NET Core.
+Sous Windows, l'interface s'ouvre dans une fenetre autonome et les donnees
+restent sauvegardees dans les fichiers JSON du dossier `data`.
 
 ## Installation
 
 ```bash
-npm install
-npm link # optionnel, pour utiliser la commande `tasktracker` globalement
+dotnet run
 ```
 
-## Interface graphique (recommandee)
+Le SDK .NET 10 est requis pour lancer le projet depuis ses sources.
+
+## Application Windows autonome
+
+Generez un executable Windows qui ne depend ni de Node.js ni du SDK .NET :
+
+```powershell
+dotnet publish -c Release -f net10.0-windows -r win-x64 --self-contained true -p:PublishSingleFile=true -o dist
+```
+
+Telechargez l'archive Windows depuis la page des releases GitHub, puis extrayez
+son contenu et lancez `TaskTracker.exe`. L'application s'ouvre dans sa propre
+fenetre, sans lancer le navigateur. Le runtime Microsoft Edge WebView2 doit etre
+installe (il est inclus avec Windows 11 et les versions recentes de Windows 10).
+`TaskTracker.bat` reste un lanceur pratique pour les sources : il execute le
+projet via le SDK .NET.
+
+## Interface graphique
 
 ```bash
-node bin/tasktracker.js
-# ou, avec un port personnalise:
-node bin/tasktracker.js gui --port 3000
+dotnet run
+# ou, avec un port personnalise (fenetre Windows) :
+dotnet run -- gui --port 3000
 ```
 
-Ouvrez ensuite l'URL affichee (par defaut http://localhost:3000). La premiere
+Sous Linux, ou pour ouvrir explicitement l'interface dans un navigateur :
+
+```bash
+dotnet run -- web --port 3000
+```
+
+La premiere
 page affichee est toujours l'ecran "Qui joue ?" (comme sur Xbox), qui permet
 de choisir ou creer un profil local (nametag, prenom, nom, date de naissance,
 photo ou avatar). Chaque profil a ses propres taches. Vous pouvez tout faire
@@ -53,29 +76,29 @@ autre profil.
 
 ```bash
 # Gerer les profils
-node bin/tasktracker.js profile list
-node bin/tasktracker.js profile add "Joueur 2" --avatar 🚀
-node bin/tasktracker.js profile edit 2 --prenom Alex --nom Martin --naissance 1998-04-02
-node bin/tasktracker.js profile rm 2
+dotnet run -- profile list
+dotnet run -- profile add "Joueur 2" --avatar 🚀
+dotnet run -- profile edit 2 --prenom Alex --nom Martin --naissance 1998-04-02
+dotnet run -- profile rm 2
 
 # Ajouter une tache (deadline optionnelle, format AAAA-MM-JJ)
-node bin/tasktracker.js --profile 1 add "Preparer la presentation" --deadline 2026-09-15
+dotnet run -- --profile 1 add "Preparer la presentation" --deadline 2026-09-15
 
 # Ajouter une sous-tache a la tache #1
-node bin/tasktracker.js add-sub 1 "Creer les slides" --deadline 2026-09-10
+dotnet run -- add-sub 1 "Creer les slides" --deadline 2026-09-10
 
 # Lister les taches et sous-taches
-node bin/tasktracker.js list
+dotnet run -- list
 
 # Definir/modifier une deadline
-node bin/tasktracker.js deadline 1 2026-09-20
+dotnet run -- deadline 1 2026-09-20
 
 # Marquer comme terminee / non terminee
-node bin/tasktracker.js done 2
-node bin/tasktracker.js undone 2
+dotnet run -- done 2
+dotnet run -- undone 2
 
 # Supprimer une tache ou sous-tache
-node bin/tasktracker.js rm 2
+dotnet run -- rm 2
 ```
 
 Les taches de chaque profil sont sauvegardees dans `data/tasks-<id>.json`, et
