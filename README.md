@@ -1,8 +1,13 @@
 # TaskTracker
 
 Gestionnaire de taches, sous-taches et deadlines ecrit en C# avec ASP.NET Core.
-Sous Windows, l'interface s'ouvre dans une fenetre autonome et les donnees
-restent sauvegardees dans les fichiers JSON du dossier `data`.
+Sous Windows, l'interface s'ouvre dans une fenetre autonome. En developpement les
+donnees sont sauvegardees dans le dossier `data` du projet ; pour l'application
+Windows publiee (release), elles sont sauvegardees dans
+`%AppData%\TaskTracker\data`, un dossier dedie propre a chaque utilisateur, afin
+que les profils soient retrouves automatiquement au demarrage, y compris apres
+une mise a jour de l'application.
+
 
 ## Installation
 

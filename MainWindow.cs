@@ -6,13 +6,13 @@ namespace TaskTracker;
 public sealed class MainWindow : Form
 {
     private readonly WebApplication server;
-    private readonly Uri applicationUri;
+    private readonly Task hostStartTask;
     private readonly WebView2 browser = new() { Dock = DockStyle.Fill };
 
-    public MainWindow(WebApplication server, Uri applicationUri)
+    public MainWindow(WebApplication server, Task hostStartTask)
     {
         this.server = server;
-        this.applicationUri = applicationUri;
+        this.hostStartTask = hostStartTask;
         Text = "TaskTracker";
         StartPosition = FormStartPosition.CenterScreen;
         MinimumSize = new Size(900, 620);
@@ -25,9 +25,11 @@ public sealed class MainWindow : Form
     {
         try
         {
-            await browser.EnsureCoreWebView2Async();
+            // Run WebView2 environment creation and host startup concurrently instead of sequentially.
+            var webViewReadyTask = browser.EnsureCoreWebView2Async();
+            await Task.WhenAll(webViewReadyTask, hostStartTask);
             browser.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
-            browser.Source = applicationUri;
+            browser.Source = new Uri(server.Urls.Single());
         }
         catch (Exception exception)
         {

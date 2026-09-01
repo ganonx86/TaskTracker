@@ -36,11 +36,33 @@ let editingProfileId = null; // null = creation, sinon id du profil modifie
 
 let modalMode = null; // { type: 'task' | 'subtask' | 'deadline', taskId?, itemId? }
 let previousScore = null; // score total lors du dernier rendu (null = pas encore initialise)
+let previousLevel = null; // niveau lors du dernier rendu (null = pas encore initialise)
 const scoreBadgeEl = document.getElementById("score-badge");
 const scoreValueEl = document.getElementById("score-value");
+const levelBadgeEl = document.getElementById("level-badge");
+const levelValueEl = document.getElementById("level-value");
+const levelProgressFillEl = document.getElementById("level-progress-fill");
 
 const POINTS_PER_SUBTASK = 5;
 const MAX_POINTS_PER_TASK = 50;
+// XP requis pour passer du niveau n au niveau n+1 : une courbe qui s'allonge, comme dans un jeu video.
+const LEVEL_BASE_XP = 100;
+
+function xpForLevel(level) {
+  return LEVEL_BASE_XP * level;
+}
+
+function computeLevelInfo(totalXp) {
+  let level = 1;
+  let remaining = totalXp;
+  let needed = xpForLevel(level);
+  while (remaining >= needed) {
+    remaining -= needed;
+    level++;
+    needed = xpForLevel(level);
+  }
+  return { level, currentXp: remaining, neededXp: needed };
+}
 
 async function api(url, options) {
   const res = await fetch(url, {
@@ -325,6 +347,32 @@ function updateScoreBadge(total, delta) {
     scoreBadgeEl.appendChild(float);
     float.addEventListener("animationend", () => float.remove(), { once: true });
   }
+  updateLevelBadge(total);
+}
+
+function updateLevelBadge(total) {
+  const { level, currentXp, neededXp } = computeLevelInfo(total);
+  levelValueEl.textContent = level;
+  levelProgressFillEl.style.width = `${Math.round((currentXp / neededXp) * 100)}%`;
+  if (previousLevel !== null && level > previousLevel) {
+    playAchievementSound();
+    levelBadgeEl.classList.remove("pulse");
+    void levelBadgeEl.offsetWidth; // relance l'animation meme si elle vient de jouer
+    levelBadgeEl.classList.add("pulse");
+    showLevelUpCelebration(level);
+  }
+  previousLevel = level;
+}
+
+function showLevelUpCelebration(level) {
+  const toast = document.createElement("div");
+  toast.className = "toast achievement-toast";
+  toast.innerHTML = `<span class="toast-icon">⭐</span><div class="toast-content"><div class="toast-kicker">Niveau superieur</div><div class="toast-title">Niveau ${level}</div></div>`;
+  document.getElementById("toast-container").appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add("toast-out");
+    toast.addEventListener("animationend", () => toast.remove(), { once: true });
+  }, 2800);
 }
 
 async function refresh() {

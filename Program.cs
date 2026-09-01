@@ -51,15 +51,15 @@ app.MapGet("/api/profiles/{profileId:int}/achievement-catalog", (int profileId, 
 #if WINDOWS
 if (useDesktopWindow)
 {
-	await app.StartAsync();
-	var address = app.Urls.Single();
+	// Start the ASP.NET Core host without waiting for it, so the window and WebView2 can initialize concurrently.
+	var hostStartTask = app.StartAsync();
 	// WebView2/WinForms require STA, but the top-level statements entry point runs as MTA by default.
 	var uiThread = new Thread(() =>
 	{
 		ApplicationConfiguration.Initialize();
 		try
 		{
-			Application.Run(new MainWindow(app, new Uri(address)));
+			Application.Run(new MainWindow(app, hostStartTask));
 		}
 		catch (Exception exception)
 		{
