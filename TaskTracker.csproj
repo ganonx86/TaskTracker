@@ -47,4 +47,8 @@
     </ItemGroup>
     <Delete Files="@(FilesToCleanUp)" />
   </Target>
+  <!-- Mark the runtime DLLs as hidden so Explorer only shows TaskTracker.exe by default; only meaningful when publishing on Windows itself. -->
+  <Target Name="HidePublishedDlls" AfterTargets="Publish" Condition="'$(OS)' == 'Windows_NT'">
+    <Exec Command="attrib +h &quot;$(PublishDir)*.dll&quot;" />
+  </Target>
 </Project>
