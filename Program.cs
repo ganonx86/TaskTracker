@@ -7,7 +7,8 @@ using System.Windows.Forms;
 var useDesktopWindow = OperatingSystem.IsWindows() && (args.Length == 0 || args[0] == "gui");
 var isGui = useDesktopWindow || args.Length == 0 || args[0] == "web";
 var port = 3000;
-var builder = WebApplication.CreateBuilder();
+// Slim builder skips config/logging providers we don't use (appsettings, HTTPS, event log), for a faster boot.
+var builder = WebApplication.CreateSlimBuilder();
 if (isGui)
 {
 	var portIndex = Array.FindIndex(args, argument => argument is "--port" or "-p");
@@ -44,7 +45,7 @@ app.MapPost("/api/profiles/{profileId:int}/tasks", (int profileId, TaskRequest r
 app.MapPost("/api/profiles/{profileId:int}/tasks/{taskId:int}/subtasks", (int profileId, int taskId, TaskRequest request, TaskService tasks) => Execute(() => Results.Created($"/api/profiles/{profileId}/tasks/{taskId}/subtasks", tasks.AddSubtask(profileId, taskId, request.Title, request.Deadline))));
 app.MapPatch("/api/profiles/{profileId:int}/items/{id:int}/complete", (int profileId, int id, CompletionRequest request, TaskService tasks, AchievementService achievements) => Execute(() => { var item = tasks.CompleteItem(profileId, id, request.Completed); var unlocked = request.Completed ? achievements.UnlockEligible(profileId, tasks.ListTasks(profileId)) : []; return Results.Ok(new { item.Id, item.Title, item.Deadline, item.Completed, item.CreatedAt, item.CompletedAt, item.Subtasks, achievement = unlocked.LastOrDefault(), achievements = unlocked }); }));
 app.MapPatch("/api/profiles/{profileId:int}/items/{id:int}/deadline", (int profileId, int id, DeadlineRequest request, TaskService tasks) => Execute(() => Results.Ok(tasks.SetDeadline(profileId, id, request.Deadline))));
-app.MapDelete("/api/profiles/{profileId:int}/items/{id:int}", (int profileId, int id, TaskService tasks, ProfileService profiles) => Execute(() => { var item = tasks.RemoveItem(profileId, id); profiles.ArchivePoints(profileId, TaskService.ComputeTaskPoints(item)); return Results.Ok(item); }));
+app.MapDelete("/api/profiles/{profileId:int}/items/{id:int}", (int profileId, int id, TaskService tasks) => Execute(() => Results.Ok(tasks.RemoveItem(profileId, id))));
 app.MapGet("/api/profiles/{profileId:int}/achievements", (int profileId, int? limit, AchievementService achievements) => achievements.List(profileId, limit));
 app.MapGet("/api/profiles/{profileId:int}/achievement-catalog", (int profileId, AchievementService achievements) => achievements.Catalog(profileId));
 

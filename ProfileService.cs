@@ -41,14 +41,6 @@ public sealed class ProfileService(DataStore store)
         return profile;
     }
 
-    public Profile ArchivePoints(int id, int points)
-    {
-        var data = store.LoadProfiles();
-        var profile = Find(data, id);
-        if (points > 0) { profile.PointsArchives += points; store.SaveProfiles(data); }
-        return profile;
-    }
-
     private static Profile Find(ProfileData data, int id) => data.Profiles.SingleOrDefault(profile => profile.Id == id) ?? throw new InvalidOperationException($"Profil #{id} introuvable.");
     private static bool IsAvatar(string? avatar) => avatar is not null && Avatars.Contains(avatar);
     private static string? TrimOrNull(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();

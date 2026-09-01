@@ -49,7 +49,6 @@ public sealed class Achievement
     public int TaskId { get; set; }
     public string Title { get; set; } = "";
     public string Description { get; set; } = "";
-    public int Points { get; set; } = 50;
     public string CompletedAt { get; set; } = "";
 }
 
@@ -64,4 +63,4 @@ public sealed record TaskRequest(string? Title, string? Deadline);
 public sealed record CompletionRequest(bool Completed);
 public sealed record DeadlineRequest(string? Deadline);
 
-public sealed record AchievementDefinition(string Id, string Title, string Description, string? Rule = null, int? Threshold = null, bool Hidden = false, int Points = 50);
+public sealed record AchievementDefinition(string Id, string Title, string Description, string? Rule = null, int? Threshold = null, bool Hidden = false);

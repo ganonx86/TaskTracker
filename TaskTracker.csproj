@@ -7,6 +7,11 @@
     <AssemblyName>TaskTracker</AssemblyName>
     <StaticWebAssetBasePath>/</StaticWebAssetBasePath>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <!-- No culture-specific formatting is used server-side; skipping ICU loading speeds up boot. -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <EventSourceSupport>false</EventSourceSupport>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="public/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

@@ -21,7 +21,7 @@ public sealed class AchievementService(DataStore store)
         return Definitions.Select(definition =>
         {
             var status = data.Statuses[definition.Id];
-            return new { definition.Id, definition.Title, definition.Description, definition.Rule, definition.Threshold, definition.Hidden, definition.Points, Unlocked = status.State == "unlocked", status.CompletedAt };
+            return new { definition.Id, definition.Title, definition.Description, definition.Rule, definition.Threshold, definition.Hidden, Unlocked = status.State == "unlocked", status.CompletedAt };
         });
     }
 
@@ -34,7 +34,7 @@ public sealed class AchievementService(DataStore store)
         foreach (var definition in Definitions)
         {
             if (unlockedIds.Contains(definition.Id) || !MeetsCondition(definition, completed)) continue;
-            var achievement = new Achievement { Id = data.NextId++, DefinitionId = definition.Id, TaskId = completed[^1].Id, Title = definition.Title, Description = definition.Description, Points = definition.Points, CompletedAt = Now() };
+            var achievement = new Achievement { Id = data.NextId++, DefinitionId = definition.Id, TaskId = completed[^1].Id, Title = definition.Title, Description = definition.Description, CompletedAt = Now() };
             data.Achievements.Add(achievement);
             data.Statuses[definition.Id] = new AchievementStatus { State = "unlocked", CompletedAt = achievement.CompletedAt };
             unlocked.Add(achievement);

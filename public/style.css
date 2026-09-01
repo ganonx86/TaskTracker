@@ -161,6 +161,8 @@ body {
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .profile-chip {
@@ -311,9 +313,10 @@ body {
 }
 
 .app {
-  max-width: 720px;
+  max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
-  padding: 48px 24px 80px;
+  padding: 40px clamp(24px, 4vw, 64px) 80px;
 }
 
 .achievements-preview {
@@ -390,9 +393,10 @@ body {
 }
 
 .achievements-page {
-  max-width: 640px;
+  max-width: 1100px;
+  width: 100%;
   margin: 0 auto;
-  padding: 48px 24px 80px;
+  padding: 48px clamp(24px, 4vw, 64px) 80px;
 }
 
 .back-link {
@@ -445,8 +449,9 @@ body {
 }
 
 .achievements-full-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  align-items: start;
   gap: 10px;
 }
 
@@ -531,6 +536,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
   margin-bottom: 32px;
 }
 
@@ -539,11 +546,14 @@ body {
   font-weight: 700;
   letter-spacing: -0.02em;
   margin: 0;
+  white-space: nowrap;
 }
 
 .app-header-right {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 14px;
 }
 
@@ -694,12 +704,14 @@ body {
 }
 
 .task-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  align-items: start;
+  gap: 16px;
 }
 
 .empty-state {
+  grid-column: 1 / -1;
   color: var(--text-muted);
   text-align: center;
   padding: 40px 0;

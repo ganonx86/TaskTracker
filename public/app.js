@@ -326,7 +326,7 @@ function showAchievementCelebration(achievement) {
   playAchievementSound();
   const toast = document.createElement("div");
   toast.className = "toast achievement-toast";
-  toast.innerHTML = `<span class="toast-icon">🏆</span><div class="toast-content"><div class="toast-kicker">Succès débloqué</div><div class="toast-title">${achievement.title}</div><div class="toast-subtitle">${achievement.description}</div></div><span class="toast-points">+${achievement.points} pts</span>`;
+  toast.innerHTML = `<span class="toast-icon">🏆</span><div class="toast-content"><div class="toast-kicker">Succès débloqué</div><div class="toast-title">${achievement.title}</div><div class="toast-subtitle">${achievement.description}</div></div>`;
   document.getElementById("toast-container").appendChild(toast);
   setTimeout(() => {
     toast.classList.add("toast-out");
@@ -426,7 +426,6 @@ function renderAchievementRow(achievement, index = 0) {
       <div class="achievement-title">${achievement.title}</div>
       <div class="achievement-date">${date}</div>
     </div>
-    <span class="achievement-points">+${achievement.points} pts</span>
   </div>`;
 }
 

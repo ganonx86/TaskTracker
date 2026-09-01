@@ -4,7 +4,7 @@ const profileId = params.get("profile");
 const activeAvatarEl = document.getElementById("active-avatar");
 const activeNameEl = document.getElementById("active-name");
 const statCountEl = document.getElementById("stat-count");
-const statPointsEl = document.getElementById("stat-points");
+const statTotalEl = document.getElementById("stat-total");
 const listEl = document.getElementById("achievements-full-list");
 const emptyStateEl = document.getElementById("achievements-empty-state");
 
@@ -39,8 +39,7 @@ function renderAchievementRow(achievement, index = 0) {
     <div class="achievement-info">
       <div class="achievement-title">${isHidden ? "???" : achievement.title}</div>
       ${details}
-    </div>
-    ${achievement.unlocked ? `<span class="achievement-points">+${achievement.points} pts</span>` : ""}`;
+    </div>`;
   return row;
 }
 
@@ -66,7 +65,7 @@ async function init() {
   activeNameEl.textContent = profile.name;
 
   statCountEl.textContent = achievements.length;
-  statPointsEl.textContent = achievements.reduce((sum, a) => sum + a.points, 0);
+  statTotalEl.textContent = catalog.length;
 
   emptyStateEl.remove();
   catalog.forEach((achievement, index) => {
