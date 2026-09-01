@@ -51,17 +51,24 @@ app.MapGet("/api/profiles/{profileId:int}/achievement-catalog", (int profileId, 
 #if WINDOWS
 if (useDesktopWindow)
 {
-	ApplicationConfiguration.Initialize();
-	try
+	await app.StartAsync();
+	var address = app.Urls.Single();
+	// WebView2/WinForms require STA, but the top-level statements entry point runs as MTA by default.
+	var uiThread = new Thread(() =>
 	{
-		await app.StartAsync();
-		var address = app.Urls.Single();
-		Application.Run(new MainWindow(app, new Uri(address)));
-	}
-	catch (Exception exception)
-	{
-		MessageBox.Show($"Impossible de demarrer TaskTracker.\n\n{exception.Message}", "TaskTracker", MessageBoxButtons.OK, MessageBoxIcon.Error);
-	}
+		ApplicationConfiguration.Initialize();
+		try
+		{
+			Application.Run(new MainWindow(app, new Uri(address)));
+		}
+		catch (Exception exception)
+		{
+			MessageBox.Show($"Impossible de demarrer TaskTracker.\n\n{exception.Message}", "TaskTracker", MessageBoxButtons.OK, MessageBoxIcon.Error);
+		}
+	});
+	uiThread.SetApartmentState(ApartmentState.STA);
+	uiThread.Start();
+	uiThread.Join();
 	return;
 }
 #endif
