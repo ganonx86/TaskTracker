@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
     <AssemblyName>TaskTracker</AssemblyName>
     <StaticWebAssetBasePath>/</StaticWebAssetBasePath>
-    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <!-- No culture-specific formatting is used server-side; skipping ICU loading speeds up boot. -->
     <InvariantGlobalization>true</InvariantGlobalization>
     <EventSourceSupport>false</EventSourceSupport>
@@ -22,6 +21,8 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
     <UseWindowsForms>true</UseWindowsForms>
     <OutputType>WinExe</OutputType>
+    <!-- A single bundled exe must self-extract on every launch, which is much slower than loading files already on disk. -->
+    <PublishSingleFile>false</PublishSingleFile>
     <!-- Precompiled native code speeds up cold start of the self-contained desktop build. -->
     <PublishReadyToRun Condition="'$(SelfContained)' == 'true'">true</PublishReadyToRun>
     <TieredPGO>true</TieredPGO>

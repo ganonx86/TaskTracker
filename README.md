@@ -19,11 +19,14 @@ Le SDK .NET 10 est requis pour lancer le projet depuis ses sources.
 
 ## Application Windows autonome
 
-Generez un executable Windows qui ne depend ni de Node.js ni du SDK .NET :
+Generez un dossier autonome qui ne depend ni de Node.js ni du SDK .NET :
 
 ```powershell
-dotnet publish -c Release -f net10.0-windows -r win-x64 --self-contained true -p:PublishSingleFile=true -o dist
+dotnet publish -c Release -f net10.0-windows -r win-x64 --self-contained true -o dist
 ```
+
+(Ne pas ajouter `-p:PublishSingleFile=true` : le mode "fichier unique" doit se
+reextraire a chaque lancement, ce qui ralentit fortement le demarrage.)
 
 Telechargez l'archive Windows depuis la page des releases GitHub, puis extrayez
 integralement son contenu avant de lancer `dist\TaskTracker.exe`. L'application s'ouvre dans sa propre

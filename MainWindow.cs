@@ -1,4 +1,5 @@
 #if WINDOWS
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
 namespace TaskTracker;
@@ -26,9 +27,7 @@ public sealed class MainWindow : Form
         try
         {
             // Run WebView2 environment creation and host startup concurrently instead of sequentially.
-            var webViewReadyTask = browser.EnsureCoreWebView2Async();
-            await Task.WhenAll(webViewReadyTask, hostStartTask);
-            browser.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
+            await Task.WhenAll(InitializeWebViewAsync(), hostStartTask);
             browser.Source = new Uri(server.Urls.Single());
         }
         catch (Exception exception)
@@ -36,6 +35,15 @@ public sealed class MainWindow : Form
             MessageBox.Show($"Impossible de demarrer l'interface TaskTracker.\n\n{exception.Message}", "TaskTracker", MessageBoxButtons.OK, MessageBoxIcon.Error);
             Close();
         }
+    }
+
+    private async Task InitializeWebViewAsync()
+    {
+        // Force a writable user data folder: the exe's own folder may be read-only (e.g. Program Files), which silently stalls WebView2 init.
+        var userDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TaskTracker", "WebView2");
+        var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: userDataFolder);
+        await browser.EnsureCoreWebView2Async(environment);
+        browser.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true;
     }
 
     protected override async void OnFormClosed(FormClosedEventArgs eventArgs)
