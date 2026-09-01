@@ -17,6 +17,9 @@
     <!-- Local runtime data must never ship in the app package. -->
     <Content Remove="data/**" />
     <None Remove="data/**" />
+    <!-- Leftover from the old Node.js version of this project; unused by the .NET app. -->
+    <Content Remove="package-lock.json" />
+    <None Remove="package-lock.json" />
   </ItemGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net10.0-windows'">
     <UseWindowsForms>true</UseWindowsForms>
@@ -35,5 +38,13 @@
     <ItemGroup>
       <Reference Remove="@(Reference)" Condition="'%(Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
     </ItemGroup>
+  </Target>
+  <!-- createdump.exe (crash-dump helper) and .xml doc comments aren't needed to run the app; drop them to declutter the publish folder. -->
+  <Target Name="RemoveUnneededPublishFiles" AfterTargets="Publish">
+    <ItemGroup>
+      <FilesToCleanUp Include="$(PublishDir)createdump*" />
+      <FilesToCleanUp Include="$(PublishDir)*.xml" />
+    </ItemGroup>
+    <Delete Files="@(FilesToCleanUp)" />
   </Target>
 </Project>
