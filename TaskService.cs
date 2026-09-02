@@ -55,11 +55,25 @@ public sealed class TaskService(DataStore store)
     {
         var data = store.LoadTasks(profileId);
         var task = data.Tasks.SingleOrDefault(item => item.Id == id);
-        if (task is not null) { data.Tasks.Remove(task); store.SaveTasks(profileId, data); return task; }
+        if (task is not null)
+        {
+            ArchivePoints(profileId, ComputeTaskPoints(task));
+            data.Tasks.Remove(task);
+            store.SaveTasks(profileId, data);
+            return task;
+        }
         foreach (var parent in data.Tasks)
         {
             var subtask = parent.Subtasks.SingleOrDefault(item => item.Id == id);
-            if (subtask is not null) { parent.Subtasks.Remove(subtask); store.SaveTasks(profileId, data); return subtask; }
+            if (subtask is not null)
+            {
+                var pointsBeforeRemoval = ComputeTaskPoints(parent);
+                parent.Subtasks.Remove(subtask);
+                var pointsAfterRemoval = ComputeTaskPoints(parent);
+                ArchivePoints(profileId, pointsBeforeRemoval - pointsAfterRemoval);
+                store.SaveTasks(profileId, data);
+                return subtask;
+            }
         }
         throw new InvalidOperationException($"Element #{id} introuvable.");
     }
@@ -74,6 +88,14 @@ public sealed class TaskService(DataStore store)
     }
 
     private static TaskItem? FindItem(TaskData data, int id) => data.Tasks.SingleOrDefault(item => item.Id == id) ?? data.Tasks.SelectMany(item => item.Subtasks).SingleOrDefault(item => item.Id == id);
+    private void ArchivePoints(int profileId, int points)
+    {
+        if (points <= 0) return;
+        var data = store.LoadProfiles();
+        var profile = data.Profiles.SingleOrDefault(item => item.Id == profileId) ?? throw new InvalidOperationException($"Profil #{profileId} introuvable.");
+        profile.PointsArchives += points;
+        store.SaveProfiles(data);
+    }
     private static void SetCompleted(TaskItem item, bool done) { item.Completed = done; item.CompletedAt = done ? Now() : null; }
     private static void RequireTitle(string? title) { if (string.IsNullOrWhiteSpace(title)) throw new InvalidOperationException("Le titre est requis."); }
     private static string Now() => DateTimeOffset.UtcNow.ToString("O");

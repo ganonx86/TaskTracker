@@ -60,6 +60,7 @@ a la souris :
 - clic sur la case a cocher pour marquer termine / non termine
 - clic sur le badge de deadline pour la modifier (rouge = en retard)
 - bouton **✕** pour supprimer
+- supprimer une tache terminee conserve les points deja gagnes dans le score du profil
 - clic sur le profil (en haut a gauche) pour ouvrir un menu : **Modifier le
   profil** ou **Changer de profil** (retour a l'ecran de selection)
 - sur l'ecran "Qui joue ?", crayon **✎** sur une tuile pour modifier ce profil
